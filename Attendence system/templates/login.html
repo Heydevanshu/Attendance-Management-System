@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login - Attendance System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container1">
+        <p>Welcome</p>
+        <h3><span><b>STUDENT ATTENDENCE MANAGEMENT SYSTEM</b></span></h3>
+        <div class="ms-auto"></div>
+    </div>
+    
+  </nav>
+
+
+    <div class="container">
+        <h2>Login</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+
+            <label >Role:</label>
+            <select name="role" required>
+                <option value="" selected>--Select your role--</option>
+                <option value="teacher">Teacher</option>
+                <option value="student" >Student</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <label for="email_or_id">ID </label>
+            <input id="email_or_id" type="text" name="email_or_id" required autocomplete="username">
+
+            <label for="password">Password:</label>
+            <input id="password" type="password" name="password" required autocomplete="current-password">
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p class="muted">Don't have an account? <a href="{{ url_for('signup') }}">Sign Up</a></p>
+    </div>
+
+</body>
+</html>
