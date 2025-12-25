@@ -1,2 +1,2 @@
-web: gunicorn Attendence\
-system.app:app
+web: gunicorn "Attendence
+system.app:app"
