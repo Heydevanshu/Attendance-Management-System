@@ -7,7 +7,7 @@ import secrets
 import math
 
 app = Flask(__name__)
-app.secret_key = "change_this_secret"  # change in production
+app.secret_key = os.environ.get("SECRET_KEY")
 
 # ----------------- Helpers -----------------
 def haversine_distance_m(lat1, lon1, lat2, lon2):
@@ -748,4 +748,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(os.environ.get("PORT",5000))
     )
+
 
