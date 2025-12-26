@@ -1,6 +1,4 @@
 import os
-print(os)
-print(type(os))
 import mysql.connector
 
 def get_connection():
@@ -13,4 +11,5 @@ def get_connection():
         port = int(os.environ.get("DB_PORT",3306))
     )
     
+
 
