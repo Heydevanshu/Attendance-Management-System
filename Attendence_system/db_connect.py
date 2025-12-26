@@ -3,13 +3,14 @@ import mysql.connector
 
 def get_connection():
     return mysql.connector.connect(
-        host = os.environ.get("DB_HOST"),
-        user = os.environ.get("DB_USER"),
+        host = os.environ.get("MYSQLHOST"),
+        user = os.environ.get("MYSQLUSER"),
 
-        password = os.enviorn.get("DB_PASSWORD"),
-        database = os.environ.get("DB_NAME"),
-        port = int(os.environ.get("DB_PORT",3306))
+        password = os.enviorn.get("MYSQLPASSWORD"),
+        database = os.environ.get("MYSQLDATABASE"),
+        port = int(os.environ.get("MYSQLPORT",3306))
     )
     
+
 
 
