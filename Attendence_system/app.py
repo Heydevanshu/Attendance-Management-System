@@ -1,4 +1,5 @@
 # app.py
+import os
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from db_connect import get_connection
 from datetime import datetime, timedelta, date
@@ -743,4 +744,8 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT",5000))
+    )
+
