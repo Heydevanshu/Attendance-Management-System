@@ -8,9 +8,10 @@ def get_connection():
 
         password = os.environ("MYSQLPASSWORD"),
         database = os.environ("MYSQLDATABASE"),
-        port = int(os.environ("MYSQLPORT"))
+        port = int(os.environ("MYSQLPORT",3306))
     )
     
+
 
 
 
