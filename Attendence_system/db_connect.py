@@ -1,20 +1,26 @@
 import os
 import mysql.connector
 from mysql.connector import Error
-# db_connect.py update
+
 def get_connection():
     try:
-        # Dashboard se uthayega, nahi toh ye password use karega (IyzP... waala jo screenshot mein hai)
-        password = os.environ.get("MYSQL_ROOT_PASSWORD") or "Yahan_Apna_Actual_Password_Likhein"
-        
-        connection = mysql.connector.connect(
-            host=os.environ.get("MYSQLHOST") or "ballast.proxy.rlwy.net",
-            user=os.environ.get("MYSQLUSER") or "root",
-            password=password,
-            database=os.environ.get("MYSQL_DATABASE") or "railway",
-            port=50532
-        )
        
+        host = os.environ.get("MYSQLHOST") or "mysql.railway.internal"
+        user = os.environ.get("MYSQLUSER") or "root"
+        password = os.environ.get("MYSQL_ROOT_PASSWORD") or os.environ.get("MYSQLPASSWORD")
+        database = os.environ.get("MYSQL_DATABASE") or "railway"
+        
+    
+        port = 3306 
+
+        connection = mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=database,
+            port=port
+        )
+        
         if connection.is_connected():
             return connection
 
