@@ -4,24 +4,25 @@ from mysql.connector import Error
 
 def get_connection():
     try:
-        # 1. for variable fetching
-        user = os.environ.get("MYSQLUSER") or os.environ.get("MYSQL_USER")
-        password = os.environ.get("MYSQLPASSWORD") or os.environ.get("MYSQL_PASSWORD") or os.environ.get("MYSQL_ROOT_PASSWORD")
-        host = os.environ.get("MYSQLHOST") or os.environ.get("MYSQL_HOST") or "ballast.proxy.rlwy.net"
-        database = os.environ.get("MYSQL_DATABASE") or os.environ.get("MYSQLDATABASE")
+        # 1. Password check
+        password = os.environ.get("MYSQL_ROOT_PASSWORD") or os.environ.get("MYSQLPASSWORD") or os.environ.get("MYSQL_PASSWORD")
         
-        p = os.environ.get("MYSQLPORT") or os.environ.get("MYSQL_PORT")
+        # 2. Host check
+        host = os.environ.get("MYSQLHOST") or "ballast.proxy.rlwy.net"
+        
+        # 3. Port handle
+        p = os.environ.get("MYSQLPORT")
         port = int(p) if p else 50532
 
-        # for debuging
-        if not password:
-            print("Warning: Password nahi mila, variable check karein!")
+        # 4. Database Name
+        db_name = os.environ.get("MYSQL_DATABASE") or os.environ.get("MYSQLDATABASE") or "railway"
 
+        # Connection setup
         connection = mysql.connector.connect(
             host=host,
-            user=user,
+            user=os.environ.get("MYSQLUSER") or "root",
             password=password,
-            database=database,
+            database=db_name,
             port=port
         )
 
