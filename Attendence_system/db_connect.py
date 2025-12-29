@@ -2,28 +2,17 @@ import os
 import mysql.connector
 from mysql.connector import Error
 
+# db_connect.py update
 def get_connection():
     try:
-        # 1. Password check
-        password = os.environ.get("MYSQL_ROOT_PASSWORD") or os.environ.get("MYSQLPASSWORD") or os.environ.get("MYSQL_PASSWORD")
+        password = os.environ.get("MYSQL_ROOT_PASSWORD") or "Yahan_Apna_Actual_Password_Likhein"
         
-        # 2. Host check
-        host = os.environ.get("MYSQLHOST") or "ballast.proxy.rlwy.net"
-        
-        # 3. Port handle
-        p = os.environ.get("MYSQLPORT")
-        port = int(p) if p else 50532
-
-        # 4. Database Name
-        db_name = os.environ.get("MYSQL_DATABASE") or os.environ.get("MYSQLDATABASE") or "railway"
-
-        # Connection setup
         connection = mysql.connector.connect(
-            host=host,
+            host=os.environ.get("MYSQLHOST") or "ballast.proxy.rlwy.net",
             user=os.environ.get("MYSQLUSER") or "root",
             password=password,
-            database=db_name,
-            port=port
+            database=os.environ.get("MYSQL_DATABASE") or "railway",
+            port=50532
         )
 
         if connection.is_connected():
@@ -32,3 +21,4 @@ def get_connection():
     except Error as e:
         print(f"Connection Error Detail: {e}")
         return None
+
