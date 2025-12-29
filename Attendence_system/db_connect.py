@@ -4,17 +4,17 @@ from mysql.connector import Error
 
 def get_connection():
     try:
+ 
         host = os.environ.get("MYSQLHOST") or "ballast.proxy.rlwy.net"
         user = os.environ.get("MYSQLUSER") or "root"
-        
-        # Password 
         password = os.environ.get("MYSQL_ROOT_PASSWORD") or os.environ.get("MYSQLPASSWORD")
-        
-        # Port handle 
-        p = os.environ.get("MYSQLPORT")
-        port = int(p) if p else 50532
-        
         database = os.environ.get("MYSQL_DATABASE") or os.environ.get("MYSQLDATABASE") or "railway"
+        
+        p = os.environ.get("MYSQLPORT")
+        if p:
+            port = int(p)
+        else:
+            port = 50532 if "proxy.rlwy.net" in host else 3306
 
         connection = mysql.connector.connect(
             host=host,
