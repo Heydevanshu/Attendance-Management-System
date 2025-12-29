@@ -4,27 +4,25 @@ from mysql.connector import Error
 
 def get_connection():
     try:
-        # Railway automatically provides these if linked
-        # Internal host is usually just 'mysql' or provided via MYSQLHOST
-        host = os.environ.get("MYSQLHOST") 
-        user = os.environ.get("MYSQLUSER") or "root"
-        password = os.environ.get("MYSQL_ROOT_PASSWORD") or os.environ.get("MYSQLPASSWORD")
-        database = os.environ.get("MYSQL_DATABASE") or "railway"
+        # 1. Host
+        host = os.environ.get("MYSQLHOST") or "ballast.proxy.rlwy.net"
         
-        # Internal port is 3306, Public is 50532. 
-        # We try to detect which one to use.
+        # 2. Port
         port_env = os.environ.get("MYSQLPORT")
-        port = int(port_env) if port_env else 3306 
+        port = int(port_env) if port_env else 50532
+
+        # 3. Password
+        password = os.environ.get("MYSQL_ROOT_PASSWORD") or os.environ.get("MYSQLPASSWORD")
 
         connection = mysql.connector.connect(
             host=host,
-            user=user,
+            user=os.environ.get("MYSQLUSER") or "root",
             password=password,
-            database=database,
+            database=os.environ.get("MYSQL_DATABASE") or "railway",
             port=port
         )
         return connection
 
     except Error as e:
-        print(f"Connection Error Detail: {e}")
+        print(f"Detailed Connection Error: {e}")
         return None
