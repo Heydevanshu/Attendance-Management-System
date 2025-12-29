@@ -7,18 +7,19 @@ def get_connection():
        
         host = os.environ.get("MYSQLHOST") or "mysql.railway.internal"
         user = os.environ.get("MYSQLUSER") or "root"
+  
         password = os.environ.get("MYSQL_ROOT_PASSWORD") or os.environ.get("MYSQLPASSWORD")
         database = os.environ.get("MYSQL_DATABASE") or "railway"
         
-    
-        port = 3306 
+        if not password:
+            password = "IyzPAnsHRQJWxmaWKHyHAZzlUnjAJEpl"
 
         connection = mysql.connector.connect(
             host=host,
             user=user,
             password=password,
             database=database,
-            port=port
+            port=3306
         )
         
         if connection.is_connected():
