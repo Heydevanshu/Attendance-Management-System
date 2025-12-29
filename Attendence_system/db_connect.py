@@ -4,14 +4,14 @@ from mysql.connector import Error
 
 def get_connection():
     try:
-        # 1. Port handle 
+        # 1. Port
         port_env = os.environ.get("MYSQLPORT")
         port_to_use = int(port_env) if port_env else 50532
 
-        # 2. Host handle 
-        host_to_use = os.environ.get("MYSQLHOST") or "viaduct.proxy.rlwy.net"
+        # 2. Host
+        host_to_use = os.environ.get("MYSQLHOST") or "ballast.proxy.rlwy.net"
 
-        # 3. Connection 
+        # 3. Connection
         connection = mysql.connector.connect(
             host=host_to_use,
             user=os.environ.get("MYSQLUSER"),
@@ -21,27 +21,16 @@ def get_connection():
         )
 
         if connection.is_connected():
-            print("Successfully connected to Railway MySQL")
             return connection
 
     except Error as e:
-        print(f"Error while connecting to MySQL: {e}")
+        print(f"Connection Error: {e}")
         return None
 
 if __name__ == "__main__":
     conn = get_connection()
     if conn:
-        print("Connection working fine!")
+        print("Success! Database connected.")
         conn.close()
-
-
-
-
-
-
-
-
-
-
-
-
+    else:
+        print("Still failing. Check Railway Environment Variables.")
