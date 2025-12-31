@@ -170,41 +170,105 @@ def signup():
     return render_template("signup.html")
 
 
-# ---- Teacher Dashboard ----
+from flask import Flask, render_template, session, redirect, url_for, flash, request, jsonify
+from datetime import datetime, timedelta
+import secrets # Token generate karne ke liye
+
+# Teacher Dashboard Route
 @app.route("/teacher/dashboard")
 def teacher_dashboard():
     if session.get('role') != 'teacher':
         return redirect(url_for('login'))
 
+    teacher_id = session.get('user_id')
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # Fetch teacher sessions
-        cursor.execute("SELECT * FROM attendance_sessions WHERE teacher_id=%s ORDER BY created_at DESC", 
-                       (session['user_id'],))
+        # 1. Fetch Stats (Present/Absent counts) for Cards
+        cursor.execute("""
+            SELECT 
+                COUNT(CASE WHEN sa.status = 'Present' THEN 1 END) as present_count,
+                COUNT(CASE WHEN sa.status = 'Absent' THEN 1 END) as absent_count
+            FROM session_attendance sa
+            JOIN attendance_sessions ads ON sa.session_id = ads.id
+            WHERE ads.teacher_id = %s
+        """, (teacher_id,))
+        stats = cursor.fetchone() or {'present_count': 0, 'absent_count': 0}
+
+        # 2. Fetch Recent Sessions with Subject Names
+        cursor.execute("""
+            SELECT s.*, sub.name as subject_name 
+            FROM attendance_sessions s
+            JOIN subjects sub ON s.subject_id = sub.id
+            WHERE s.teacher_id = %s 
+            ORDER BY s.created_at DESC LIMIT 10
+        """, (teacher_id,))
         sessions = cursor.fetchall()
 
-        # Fetch subject names (for table)
-        cursor.execute("SELECT id, name FROM subjects WHERE teacher_id=%s", (session['user_id'],))
-        subjects = cursor.fetchall()
-        subj_map = {s['id']: s['name'] for s in subjects}
+        # 3. Fetch Subjects assigned to this teacher 
+        cursor.execute("SELECT id, name FROM subjects WHERE teacher_id = %s", (teacher_id,))
+        teacher_subjects = cursor.fetchall()
+
     except Exception as e:
         flash(f"Error loading dashboard: {e}", "danger")
+        stats = {'present_count': 0, 'absent_count': 0}
         sessions = []
-        subj_map = {}
+        teacher_subjects = []
     finally:
         cursor.close()
         conn.close()
 
     return render_template(
         "dashboard_teacher.html",
-        teacher_id=session['user_id'],
-        teacher_name=session['user_name'],
+        teacher_id=teacher_id,
+        teacher_name=session.get('user_name', 'Teacher'),
         sessions=sessions,
-        subj_map=subj_map
+        subjects=teacher_subjects, # Dropdown list
+        stats=stats
     )
 
+# 4. AJAX API to Generate Session (Directly from Dashboard)
+@app.route("/generate_session_api", methods=["POST"])
+def generate_session_api():
+    if session.get('role') != 'teacher':
+        return jsonify({"error": "Unauthorized"}), 403
+
+    data = request.json
+    teacher_id = session.get('user_id')
+    
+    # Session Details
+    subject_id = data.get('subject_id')
+    duration = int(data.get('duration', 10))
+    radius = int(data.get('radius', 50))
+    lat = data.get('lat')
+    lng = data.get('lng')
+    
+    # Generate Unique Token and Expiry Time
+    token = secrets.token_urlsafe(16)
+    expires_at = datetime.now() + timedelta(minutes=duration)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        query = """
+            INSERT INTO attendance_sessions 
+            (teacher_id, subject_id, token, latitude, longitude, expires_at, max_radius_m, is_active) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 1)
+        """
+        cursor.execute(query, (teacher_id, subject_id, token, lat, lng, expires_at, radius))
+        conn.commit()
+        
+        # Student-side link generate karna
+        session_link = url_for('session_link', token=token, _external=True)
+        return jsonify({"success": True, "link": session_link})
+    
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 # ---- Student Dashboard (landing) ----
 @app.route("/student/dashboard")
@@ -748,6 +812,7 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(os.environ.get("PORT",5000))
     )
+
 
 
 
