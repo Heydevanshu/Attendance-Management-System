@@ -2,65 +2,166 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Teacher Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/teacher_dashboard.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard | Mobile Ready</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container1">
-            <div><p>Welcome</p></div>
-       <h3><span><b>STUDENT ATTENDENCE MANAGEMENT SYSTEM</b></span></h3> 
-        <div class="ms-auto"></div>
-    </div>
-     <p>Welcome, {{ teacher_name }} (Teacher ID: {{ teacher_id }})</p>
-    </nav>
-    <div class="container">
-        <h2>Teacher Dashboard</h2>
-        <div class="menu">
-            <!-- Create session button -->
-            <a class="btn" href="{{ url_for('create_session') }}"> Create Session</a>
+<body class="bg-gray-50">
 
-            <!-- View subjects assigned to this teacher -->
-            <a class="btn" href="{{ url_for('view_subjects_teacher', teacher_id=teacher_id) }}">📚 My Subjects</a>
+    <header class="lg:hidden bg-[#2b3674] text-white p-4 flex justify-between items-center fixed top-0 w-full z-50 shadow-md">
+        <h1 class="font-bold">Faculty Portal</h1>
+        <button onclick="toggleSidebar()" class="p-2 focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
+    </header>
 
-            <!-- View all sessions created by this teacher -->
-            <h3>Your Sessions</h3>
-            {% if sessions %}
-                <table style="width:100%; border-collapse: collapse;">
-                    <thead>
-                        <tr>
-                            <th style="border:1px solid #ddd; padding:8px;">ID</th>
-                            <th style="border:1px solid #ddd; padding:8px;">Subject</th>
-                            <th style="border:1px solid #ddd; padding:8px;">Created At</th>
-                            <th style="border:1px solid #ddd; padding:8px;">Expires At</th>
-                            <th style="border:1px solid #ddd; padding:8px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+    <div class="flex">
+        <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-0 z-40 w-64 bg-[#2b3674] text-white p-6 transition-transform duration-300 shadow-2xl lg:shadow-none min-h-screen">
+            <div class="flex items-center gap-3 mb-10 text-xl font-bold">
+                <i class="fas fa-graduation-cap"></i> <span>Faculty Dashboard</span>
+            </div>
+            <nav class="space-y-4">
+                <a href="#" class="flex items-center gap-3 p-3 bg-blue-600 rounded-xl"><i class="fas fa-th-large"></i> Dashboard</a>
+                <a href="#" class="flex items-center gap-3 p-3 hover:bg-[#3d4a64] rounded-xl"><i class="fas fa-book"></i> Subjects</a>
+                <a href="#" class="flex items-center gap-3 p-3 hover:bg-[#3d4a64] rounded-xl"><i class="fas fa-chart-line"></i> Reports</a>
+                <a href="{{ url_for('logout') }}" class="flex items-center gap-3 p-3 text-red-400 hover:bg-[#3d4a64] rounded-xl mt-20">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 w-full p-4 lg:p-10 mt-16 lg:mt-0 overflow-x-hidden">
+            <div class="hidden lg:flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold text-[#1b2559]">Welcome Back, {{ teacher_name }}!</h2>
+                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm">
+                    <span class="text-sm font-semibold text-gray-600">ID: {{ teacher_id }}</span>
+                    <div class="w-8 h-8 bg-indigo-500 rounded-full text-center text-white pt-1">S</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-emerald-500 text-white p-4 rounded-2xl shadow-lg">
+                    <p class="text-xs opacity-80 uppercase font-bold">Present</p>
+                    <p class="text-2xl font-bold">{{ stats.present_count }}</p>
+                </div>
+                <div class="bg-orange-400 text-white p-4 rounded-2xl shadow-lg">
+                    <p class="text-xs opacity-80 uppercase font-bold">Absent</p>
+                    <p class="text-2xl font-bold">{{ stats.absent_count }}</p>
+                </div>
+                <div class="bg-blue-500 text-white p-4 rounded-2xl shadow-lg">
+                    <p class="text-xs opacity-80 uppercase font-bold">Sessions</p>
+                    <p class="text-2xl font-bold">{{ sessions|length }}</p>
+                </div>
+                <div class="bg-indigo-600 text-white p-4 rounded-2xl shadow-lg">
+                    <p class="text-xs opacity-80 uppercase font-bold">Active</p>
+                    <p class="text-2xl font-bold">1</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-white p-6 rounded-[30px] shadow-sm">
+                    <h3 class="font-bold text-[#1b2559] mb-6 flex items-center gap-2">
+                        <i class="fas fa-plus-circle text-blue-500"></i> Create Session
+                    </h3>
+                    <form class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-gray-400">SUBJECT</label>
+                                <select id="subject" class="w-full bg-gray-50 p-3 rounded-xl border-none mt-1">
+                                    {% for sub in subjects %}
+                                    <option value="{{ sub.id }}">{{ sub.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-400">YEAR</label>
+                                <select id="year" class="w-full bg-gray-50 p-3 rounded-xl border-none mt-1">
+                                    <option value="1">1st Year</option>
+                                    <option value="2">2nd Year</option>
+                                    <option value="3">3rd Year</option>
+                                    <option value="4">4th Year</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-gray-400">SEMESTER</label>
+                                <select id="semester" class="w-full bg-gray-50 p-3 rounded-xl border-none mt-1">
+                                    {% for i in range(1, 9) %}<option>Sem {{ i }}</option>{% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-400">RADIUS (M)</label>
+                                <select id="radius" class="w-full bg-gray-50 p-3 rounded-xl border-none mt-1">
+                                    <option value="20">20m</option><option value="100">100m</option>
+                                </select>
+                            </div>
+                            <div class="col-span-2 md:col-span-1">
+                                <label class="text-xs font-bold text-gray-400">DURATION</label>
+                                <select id="duration" class="w-full bg-gray-50 p-3 rounded-xl border-none mt-1">
+                                    <option value="10">10 Min</option><option value="30">30 Min</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="generateLink()" class="w-full bg-[#4318ff] text-white py-4 rounded-2xl font-bold shadow-xl shadow-blue-200 mt-4 active:scale-95 transition">
+                            Generate Link
+                        </button>
+                    </form>
+                    
+                    <div id="result" class="mt-4 p-4 bg-blue-50 rounded-2xl border-2 border-dashed border-blue-200 hidden break-all">
+                        <p class="text-xs font-bold text-blue-400 uppercase">Share this link:</p>
+                        <span id="linkText" class="text-blue-700 text-sm"></span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-[30px] shadow-sm">
+                    <h3 class="font-bold text-[#1b2559] mb-4">Recent Sessions</h3>
+                    <div class="space-y-4 max-h-[400px] overflow-y-auto no-scrollbar">
                         {% for s in sessions %}
-                        <tr>
-                            <td style="border:1px solid #ddd; padding:8px;">{{ s.id }}</td>
-                            <td style="border:1px solid #ddd; padding:8px;">{{ subj_map.get(s.subject_id, 'Unknown') }}</td>
-                            <td style="border:1px solid #ddd; padding:8px;">{{ s.created_at }}</td>
-                            <td style="border:1px solid #ddd; padding:8px;">{{ s.expires_at }}</td>
-                            <td style="border:1px solid #ddd; padding:8px;">
-                                <a href="{{ url_for('teacher_view_session', session_id=s.id) }}">View</a>
-                                <!-- share link -->
-                                {% if s.token %}
-                                    | <a href="{{ url_for('session_link', token=s.token, _external=True) }}" target="_blank">Share Link</a>
-                                {% endif %}
-                            </td>
-                        </tr>
+                        <div class="p-4 bg-gray-50 rounded-2xl flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-sm text-[#1b2559]">{{ s.subject_name }}</p>
+                                <p class="text-[10px] text-gray-400">{{ s.created_at.strftime('%d %b, %H:%M') }}</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-300"></i>
+                        </div>
                         {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No sessions yet. Create one using the button above.</p>
-            {% endif %}
-
-            <a class="btn" href="{{ url_for('logout') }}">Logout</a>
-        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
+
+    <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black opacity-50 z-30 hidden lg:hidden"></div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        function generateLink() {
+            // Geolocation logic
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const data = {
+                    subject: document.getElementById('subject').value,
+                    year: document.getElementById('year').value,
+                    lat: pos.coords.latitude,
+                    lng: pos.coords.longitude
+                    // add other fields
+                };
+                
+                // Fetch call here
+                document.getElementById('result').classList.remove('hidden');
+                document.getElementById('linkText').innerText = "https://your-app.railway.app/mark/ABC123XYZ";
+            });
+        }
+    </script>
 </body>
 </html>
-
