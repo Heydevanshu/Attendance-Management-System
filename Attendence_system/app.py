@@ -172,7 +172,7 @@ def signup():
 
 from flask import Flask, render_template, session, redirect, url_for, flash, request, jsonify
 from datetime import datetime, timedelta
-import secrets # Token generate karne ke liye
+import secrets 
 
 # Teacher Dashboard Route
 @app.route("/teacher/dashboard")
@@ -269,6 +269,37 @@ def generate_session_api():
     finally:
         cursor.close()
         conn.close()
+
+@app.route("/teacher/attendance")
+def teacher_attendance():
+    if session.get('role') != 'teacher':
+        return redirect(url_for('login'))
+
+    teacher_id = session.get('user_id')
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Teacher's Subjects fetch karna dropdown ke liye
+        cursor.execute("SELECT id, name FROM subjects WHERE teacher_id = %s", (teacher_id,))
+        subjects = cursor.fetchall()
+
+        # Recent sessions fetch karna (with Subject names)
+        cursor.execute("""
+            SELECT s.*, sub.name as subject_name 
+            FROM attendance_sessions s 
+            JOIN subjects sub ON s.subject_id = sub.id 
+            WHERE s.teacher_id = %s ORDER BY s.created_at DESC LIMIT 5
+        """, (teacher_id,))
+        sessions = cursor.fetchall()
+        
+    finally:
+        cursor.close()
+        conn.close()
+
+    return render_template("attendance.html", 
+                           subjects=subjects, 
+                           sessions=sessions)
 
 # ---- Student Dashboard (landing) ----
 @app.route("/student/dashboard")
@@ -812,6 +843,7 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(os.environ.get("PORT",5000))
     )
+
 
 
 
