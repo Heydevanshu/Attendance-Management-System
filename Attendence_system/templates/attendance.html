@@ -1,0 +1,105 @@
+{% extends "base_layout.html" %} 
+
+{% block content %}
+<main class="flex-1 lg:ml-64 p-4 lg:p-8 mt-14 lg:mt-0 overflow-x-hidden">
+    <header class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-[#1b2559]">Attendance</h2>
+        <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm">
+            <span class="text-sm font-bold text-gray-700">{{ session['user_name'] }}</span>
+            <span class="text-xs text-gray-400">(ID: {{ session['user_id'] }})</span>
+            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center border">
+                <i class="fas fa-user text-indigo-500"></i>
+            </div>
+            <i class="fas fa-bell text-blue-500 ml-2"></i>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 space-y-6">
+            <div class="bg-white p-6 rounded-[25px] shadow-sm border border-gray-100">
+                <h3 class="font-bold text-[#1b2559] mb-4 text-sm">Create Attendance Session</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <select class="form-input text-xs"><option>Branch: CSE</option></select>
+                    <select class="form-input text-xs"><option>2nd Year | Semester 3</option></select>
+                    <select id="subject_id" class="form-input col-span-full text-xs">
+                        {% for sub in subjects %}
+                        <option value="{{ sub.id }}">{{ sub.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <select class="form-input text-xs"><option>5 minutes</option></select>
+                    <select class="form-input text-xs"><option>100 meters</option></select>
+                </div>
+                <button onclick="generateLink()" class="w-full bg-[#52796f] text-white py-3 rounded-xl mt-5 font-bold text-sm">
+                    <i class="fas fa-sync-alt mr-2"></i> Generate Attendance Link
+                </button>
+                <div id="link_box" class="mt-4 p-3 bg-indigo-50 border-dashed border-2 border-indigo-200 rounded-xl hidden">
+                    <span id="generated_url" class="text-[10px] text-blue-600 truncate"></span>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-[25px] shadow-sm overflow-x-auto">
+                <h3 class="font-bold text-[#1b2559] mb-4 text-sm">Recent Attendance Sessions</h3>
+                <table class="w-full text-left text-xs">
+                    <thead class="text-gray-400 border-b">
+                        <tr><th class="pb-2">Subject</th><th class="pb-2">Time</th><th class="pb-2">Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for s in sessions %}
+                        <tr class="border-b last:border-0">
+                            <td class="py-3 font-bold">{{ s.subject_name }}</td>
+                            <td class="py-3 text-gray-500">{{ s.created_at.strftime('%I:%M %p') }}</td>
+                            <td class="py-3"><span class="px-2 py-1 rounded-full text-[9px] font-bold {{ 'bg-emerald-100 text-emerald-600' if s.is_active else 'bg-red-50 text-red-400' }}">
+                                {{ 'ACTIVE' if s.is_active else 'EXPIRED' }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="lg:col-span-5 space-y-6">
+            <div class="bg-white p-6 rounded-[25px] shadow-sm border border-gray-100">
+                <div class="flex items-center gap-2 text-indigo-500 font-bold mb-4 text-xs">
+                    <i class="fas fa-calendar-alt"></i> Attendance Stats
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-indigo-50 p-4 rounded-2xl text-center">
+                        <p class="text-[9px] text-indigo-400 font-bold">TOTAL STUDENTS</p>
+                        <p class="text-xl font-bold text-indigo-700">62</p>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-2xl text-center border-b-4 border-emerald-500">
+                        <p class="text-[9px] text-emerald-400 font-bold">PRESENT</p>
+                        <p class="text-xl font-bold text-emerald-700">56</p>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center mt-4 bg-gray-50 p-2 rounded-lg">
+                    <span class="text-[10px] font-bold text-gray-500">90% Attendance</span>
+                    <div class="w-8 h-4 bg-blue-500 rounded-full"></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-[25px] shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xs font-bold text-[#1b2559]">Manual Attendance</h3>
+                    <button class="bg-indigo-500 text-white text-[9px] px-2 py-1 rounded">Mark Student</button>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between p-2 bg-gray-50 rounded-lg text-[11px]">
+                        <span>Rajesh Kumar (123)</span>
+                        <a href="#" class="text-blue-500 font-bold">Edit</a>
+                    </div>
+                    <div class="flex justify-between p-2 bg-gray-50 rounded-lg text-[11px]">
+                        <span>Priya Singh (124)</span>
+                        <a href="#" class="text-blue-500 font-bold">Edit</a>
+                    </div>
+                    <div class="flex justify-between p-2 bg-gray-50 rounded-lg text-[11px]">
+                        <span>Amit Malhotra (125)</span>
+                        <a href="#" class="text-blue-500 font-bold">Edit</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
