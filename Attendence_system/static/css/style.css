@@ -77,3 +77,33 @@ p {
     font-weight: bold;
     text-align: center;
 }
+
+.form-input {
+    width: 100%;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #475569;
+    outline: none;
+    transition: 0.2s;
+}
+
+.form-input:focus {
+    border-color: #4318ff;
+    background-color: white;
+}
+
+/* Custom Scrollbar for Recent Sessions */
+.overflow-x-auto::-webkit-scrollbar {
+    height: 4px;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+/* Active/Expired Badge Styling */
+.badge-active { background: #d1fae5; color: #059669; }
+.badge-expired { background: #fee2e2; color: #dc2626; }
