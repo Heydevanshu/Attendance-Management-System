@@ -9,7 +9,7 @@ def get_connection():
             user="root",
             password="IyzPANsHRQJWXmaWKHyHAZzlUnjAJEpl",
             database="railway",
-            port=3306,
+            port=50532,
             auth_plugin='mysql_native_password'
         )
         
@@ -20,4 +20,5 @@ def get_connection():
     except Error as e:
         print(f"Detailed Connection Error: {e}")
         return None
+
 
