@@ -31,22 +31,20 @@
         <option value="CIVIL">Civil</option>
     </select>
 
-    <label>Academic Year:</label>
-    <select name="year" required>
-        <option value="" selected>Select Year</option>
-        <option value="1">1st Year</option>
-        <option value="2">2nd Year</option>
-        <option value="3">3rd Year</option>
-        <option value="4">4th Year</option>
-    </select>
+   <label>Academic Year:</label>
+<select name="year" required>
+    <option value="1">1st Year</option>
+    <option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
+</select>
 
-    <label>Semester:</label>
-    <select name="semester" required>
-        <option value="" selected>Select Semester</option>
-        {% for i in range(1, 9) %}
-            <option value="{{ i }}">Semester {{ i }}</option>
-        {% endfor %}
-    </select>
+<label>Semester:</label>
+<select name="semester" required>
+    {% for i in range(1, 9) %}
+        <option value="{{ i }}">Semester {{ i }}</option>
+    {% endfor %}
+</select>
 
     <label>Teacher Assign:</label>
     <select name="teacher_id" required>
@@ -63,4 +61,5 @@
 </div>
 </body>
 </html>
+
 
