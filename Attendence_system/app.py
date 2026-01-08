@@ -749,7 +749,6 @@ def teacher_view_session(session_id):
 
 @app.route("/admin/add_subject", methods=["GET", "POST"])
 def add_subject():
-    """Admin route to create new subjects and assign them to approved teachers."""
     if session.get('role') != 'admin':
         flash("Please login as admin", "warning")
         return redirect(url_for('login'))
@@ -757,28 +756,31 @@ def add_subject():
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT id, name FROM teachers WHERE status='Approved'")
-    teachers = cursor.fetchall()
-
     if request.method == "POST":
         name = request.form.get("name").strip()
         branch = request.form.get("branch").strip()
         teacher_id = request.form.get("teacher_id")
+        # Naye fields extract karein
+        year = request.form.get("year")
+        semester = request.form.get("semester")
 
-        if not name or not branch or not teacher_id:
-            flash("All fields required", "danger")
-            return redirect(url_for("add_subject"))
-
-        cursor.execute(
-            "INSERT INTO subjects(name, branch, teacher_id) VALUES(%s, %s, %s)",
-            (name, branch, teacher_id)
-        )
-        conn.commit()
-        flash("Subject added successfully!", "success")
-        return redirect(url_for("admin_dashboard"))
-
-    cursor.close()
-    conn.close()
+        # Database insert query update 
+        try:
+            cursor.execute(
+                "INSERT INTO subjects(name, branch, teacher_id, year, semester) VALUES(%s, %s, %s, %s, %s)",
+                (name, branch, teacher_id, year, semester)
+            )
+            conn.commit()
+            flash("Subject added successfully!", "success")
+            return redirect(url_for("admin_dashboard"))
+        except Exception as e:
+            flash(f"Error: {e}", "danger")
+        finally:
+            cursor.close(); conn.close()
+            
+    cursor.execute("SELECT id, name FROM teachers WHERE status='Approved'")
+    teachers = cursor.fetchall()
+    cursor.close(); conn.close()
     return render_template("add_subject.html", teachers=teachers)
 
 
@@ -797,3 +799,4 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(os.environ.get("PORT",5000))
     )
+
