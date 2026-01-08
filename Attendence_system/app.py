@@ -120,7 +120,9 @@ def signup():
         password = request.form.get("password", "").strip()
         extra = request.form.get("extra", "").strip() if request.form.get("extra") else None
         roll_no_form = request.form.get("roll_no", "").strip()
-        year = request.form.get("year", "").strip() or None
+        year = request.form.get("year", "").strip()
+        if "Year" in year:
+            year = year.split()[0] 
 
         conn = get_connection()
         if not conn:
@@ -799,4 +801,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(os.environ.get("PORT",5000))
     )
+
 
