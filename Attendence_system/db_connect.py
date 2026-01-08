@@ -16,7 +16,7 @@ def get_connection():
             user=user,
             password=password,
             database=database,
-            port=3306,
+            port=50532,
             auth_plugin='caching_sha2_password'
         )
         
@@ -26,3 +26,4 @@ def get_connection():
     except Error as e:
         print(f"Detailed Connection Error: {e}")
         return None
+
