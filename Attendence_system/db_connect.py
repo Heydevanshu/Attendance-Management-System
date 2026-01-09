@@ -1,22 +1,14 @@
-import os
-import mysql.connector
-from mysql.connector import Error
-
 def get_connection():
     try:
         connection = mysql.connector.connect(
-            host="@ballast.proxy.rlwy.net",
+            host="ballast.proxy.rlwy.net",
             user="root",
-            password="IyzPAnsHRQJWXmaWKHyHAZzlUnjAJEpl",
+            password="IyzPANsHRQJWXmaWKHyHAZzlUnjAJEpl",
             database="railway",
             port=50532,
             auth_plugin='mysql_native_password'
         )
-        
-        if connection.is_connected():
-            return connection
-
-    except Error as e:
-        print(f"Detailed Connection Error: {e}")
+        return connection
+    except Exception as e:
+        print(f"Error: {e}")
         return None
-
