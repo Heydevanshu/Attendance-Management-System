@@ -5,9 +5,9 @@ from mysql.connector import Error
 def get_connection():
     try:
         connection = mysql.connector.connect(
-            host="ballast.proxy.rlwy.net",
+            host="@ballast.proxy.rlwy.net",
             user="root",
-            password="IyzPANsHRQJWXmaWKHyHAZzlUnjAJEpl",
+            password="IyzPAnsHRQJWXmaWKHyHAZzlUnjAJEpl",
             database="railway",
             port=50532,
             auth_plugin='mysql_native_password'
@@ -19,3 +19,4 @@ def get_connection():
     except Error as e:
         print(f"Detailed Connection Error: {e}")
         return None
+
