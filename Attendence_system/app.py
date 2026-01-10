@@ -179,10 +179,6 @@ def signup():
 
 @app.route("/teacher/dashboard")
 def teacher_dashboard():
-    """
-    Renders the teacher's landing page.
-    Displays attendance stats, recent sessions, and assigned subjects.
-    """
     if session.get('role') != 'teacher':
         return redirect(url_for('login'))
 
@@ -191,7 +187,7 @@ def teacher_dashboard():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # Fetch stats for dashboard cards
+        # 1. Stats fetch (Total Present/Absent counts)
         cursor.execute("""
             SELECT 
                 COUNT(CASE WHEN sa.status = 'Present' THEN 1 END) as present_count,
@@ -202,7 +198,7 @@ def teacher_dashboard():
         """, (teacher_id,))
         stats = cursor.fetchone() or {'present_count': 0, 'absent_count': 0}
 
-        # Fetch 10 most recent sessions
+        # 2. Recent Sessions fetch 
         cursor.execute("""
             SELECT s.*, sub.name as subject_name 
             FROM attendance_sessions s
@@ -212,25 +208,62 @@ def teacher_dashboard():
         """, (teacher_id,))
         sessions = cursor.fetchall()
 
-        # Fetch subjects assigned to teacher
-        cursor.execute("SELECT id, name FROM subjects WHERE teacher_id = %s", (teacher_id,))
-        teacher_subjects = cursor.fetchall()
-
     except Exception as e:
         flash(f"Error loading dashboard: {e}", "danger")
         stats = {'present_count': 0, 'absent_count': 0}
         sessions = []
-        teacher_subjects = []
     finally:
-        cursor.close()
-        conn.close()
+        cursor.close(); conn.close()
 
+    # 'page' variable 'dashboard'
     return render_template(
         "dashboard_teacher.html",
+        page='dashboard',
         teacher_id=teacher_id,
         teacher_name=session.get('user_name', 'Teacher'),
         sessions=sessions,
-        subjects=teacher_subjects,
+        stats=stats
+    )
+# Teacher Attendance
+
+@app.route("/teacher/attendance")
+def teacher_attendance():
+    if session.get('role') != 'teacher':
+        return redirect(url_for('login'))
+
+    teacher_id = session.get('user_id')
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # For teacher dropdown
+        cursor.execute("SELECT id, name FROM subjects WHERE teacher_id = %s", (teacher_id,))
+        subjects = cursor.fetchall()
+        
+        # Stats for attendance page
+        cursor.execute("""
+            SELECT 
+                COUNT(CASE WHEN sa.status = 'Present' THEN 1 END) as present_count,
+                COUNT(CASE WHEN sa.status = 'Absent' THEN 1 END) as absent_count
+            FROM session_attendance sa
+            JOIN attendance_sessions ads ON sa.session_id = ads.id
+            WHERE ads.teacher_id = %s
+        """, (teacher_id,))
+        stats = cursor.fetchone() or {'present_count': 0, 'absent_count': 0}
+
+    except Exception as e:
+        flash(f"Error: {e}", "danger")
+        subjects = []
+        stats = {'present_count': 0, 'absent_count': 0}
+    finally:
+        cursor.close(); conn.close()
+
+    return render_template(
+        "dashboard_teacher.html",
+        page='attendance',
+        teacher_name=session.get('user_name'),
+        teacher_id=teacher_id,
+        subjects=subjects,
         stats=stats
     )
 
@@ -275,35 +308,6 @@ def generate_session_api():
     finally:
         cursor.close()
         conn.close()
-
-@app.route("/teacher/attendance")
-def teacher_attendance():
-    """Displays the attendance management page for teachers."""
-    if session.get('role') != 'teacher':
-        return redirect(url_for('login'))
-
-    teacher_id = session.get('user_id')
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    try:
-        cursor.execute("SELECT id, name FROM subjects WHERE teacher_id = %s", (teacher_id,))
-        subjects = cursor.fetchall()
-
-        cursor.execute("""
-            SELECT s.*, sub.name as subject_name 
-            FROM attendance_sessions s 
-            JOIN subjects sub ON s.subject_id = sub.id 
-            WHERE s.teacher_id = %s ORDER BY s.created_at DESC LIMIT 5
-        """, (teacher_id,))
-        sessions = cursor.fetchall()
-        
-    finally:
-        cursor.close()
-        conn.close()
-
-    return render_template("attendance.html", subjects=subjects, sessions=sessions)
-
 
 # ---- Student Dashboard ----
 
@@ -801,5 +805,6 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=int(os.environ.get("PORT",5000))
     )
+
 
 
